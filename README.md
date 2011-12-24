@@ -1,7 +1,7 @@
 A subset of scheme
 Currently working features:
     Integers
-    Atoms (more kinds than racket would recognize because of rudimentary implementation)
+    Atoms (just a string)
     Lists
     Primitive functions/forms:
         +
