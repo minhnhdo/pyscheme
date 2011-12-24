@@ -11,6 +11,7 @@ class Tokenizer:
     def __init__(self, s):
         # separating open and close parens
         s = s.replace('(', ' ( ').replace(')', ' ) ')
+
         self.tokens = s.split()
         self.counter = 0
     def __next__(self):
@@ -57,7 +58,7 @@ isatom = str.isalpha
 def islist(l):
     return isinstance(l, list)
 
-def eval(sexp):
+def eval(sexp, env):
     if islist(sexp):
         l = []
         for exp in sexp:
@@ -77,3 +78,13 @@ def error(s):
 def apply(op, arg):
     if op == '+':
         return sum(arg)
+
+def makeenv(outer=None):
+    retval = {'outer': outer}
+    return retval
+
+def addtoglobal(globalenv):
+    globalenv.update({
+        })
+
+globalenv = makeenv()
