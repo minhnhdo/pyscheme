@@ -62,6 +62,13 @@ def parse_atom(token):
     Output: an represented atom
     Note: still a very rudimentary implementation, i.e. the identity function
     """
+    try:
+        return int(token)
+    except ValueError:
+        try:
+            return float(token)
+        except ValueError:
+            return token
 
     return token
     
@@ -83,42 +90,21 @@ def parse_sexp(tokens):
     else:
         return parse_atom(tok)
 
-read = functools.partial(input, '>>>')
-isnumber = str.isdigit
-isatom = str.isalpha
+def read():
+    inp = input('* ')
+    return parse_sexp(Tokenizer(inp))
 
-def number(sexp):
-    return int(sexp)
+def isatom(a):
+    if isinstance(a, int):
+        return True
+    else:
+        return not isinstance(a, float)
 
-def primitiveadd(*arg):
-    retval = 0
-    try:
-        for i in arg:
-            retval += i
-        return retval
-    except TypeError:
-        retval += arg
-        return retval
+def isnumber(a):
+    return isinstance(a, int) or isinstance(a, float)
 
 def islist(l):
     return isinstance(l, list)
-
-def eval(sexp, env):
-    if islist(sexp):
-        l = []
-        for exp in sexp:
-            l.append(eval(exp, env))
-        (op, *arg) = l
-        return op(*arg)
-        #return apply(op, arg, env)
-    elif isnumber(sexp):
-        return number(sexp)
-    # isidentifier
-    else:
-        return find(sexp, env)
-
-def error(s):
-    print('ERROR:', s)
 
 def makeenv(outer=None):
     """
@@ -130,12 +116,48 @@ def makeenv(outer=None):
 
 def addtoglobal(globalenv):
     globalenv.update({
-        '#t': True,
-        '#f': False,
-        '+': primitiveadd,
-        'atom?': isatom
         })
     return globalenv
+
+globalenv = addtoglobal(makeenv())
+
+def eval(sexp, env=globalenv):
+    if islist(sexp):
+        if sexp[0] == 'quit':
+            raise KeyboardInterrupt
+        elif sexp[0] == 'quote':
+            return sexp[1]
+        elif sexp[0] == '+':
+            return sum(sexp[1:])
+        elif sexp[0] == 'cond':
+            for exp in sexp[1:]:
+                if eval(exp[0], env):
+                    return eval(exp[1], env)
+        elif sexp[0] == '<':
+            return eval(sexp[1], env) < eval(sexp[2], env)
+        elif sexp[0] == '>':
+            return eval(sexp[1], env) > eval(sexp[2], env)
+        elif sexp[0] == '<=':
+            return eval(sexp[1], env) <= eval(sexp[2], env)
+        elif sexp[0] == '>=':
+            return eval(sexp[1], env) >= eval(sexp[2], env)
+        elif sexp[0] == 'lambda':
+            pass
+        else:
+            op = find(sexp[0], globalenv)
+            return op(*sexp[1:])
+    elif isnumber(sexp):
+        return sexp
+    elif sexp == '#t':
+        return True
+    elif sexp == '#f':
+        return False
+    # isidentifier
+    else:
+        return find(sexp, env)
+
+def error(s):
+    print('ERROR:', s)
 
 def find(sym, env):
     """
@@ -149,16 +171,17 @@ def find(sym, env):
         else:
             return find(sym, env['outer'])
     except TypeError:
-        return None
+        raise NameError("Undefined atom {0!r}".format(sym))
 
 def REPL():
-    while True:
-        try:
-            eval(read())
-        except (KeyboardInterrupt, EOFError):
-            print("Exiting... Bye!")
-
-globalenv = addtoglobal(makeenv())
+    try:
+        while True:
+            #try:
+                print(eval(read()))
+            #except NameError as e:
+            #    print('{0}: {1}'.format(e.__class__, str(e)))
+    except (KeyboardInterrupt, EOFError):
+        print("Exiting... Bye!")
 
 if __name__ == '__main__':
     REPL()
