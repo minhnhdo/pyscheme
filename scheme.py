@@ -60,7 +60,8 @@ def parse_atom(token):
     """
     Input: a token
     Output: an represented atom
-    Note: still a very rudimentary implementation, i.e. the identity function
+
+    Try to turn the token into a number, else just return it
     """
     try:
         return int(token)
@@ -69,7 +70,6 @@ def parse_atom(token):
             return float(token)
         except ValueError:
             return token
-
     return token
     
 
@@ -106,6 +106,12 @@ def isnumber(a):
 def islist(l):
     return isinstance(l, list)
 
+def primitivequit():
+    raise KeyboardInterrupt
+
+def primitiveadd(*args):
+    return sum(args)
+
 def makeenv(outer=None):
     """
     Make an empty environment with the outer environment specified
@@ -116,45 +122,50 @@ def makeenv(outer=None):
 
 def addtoglobal(globalenv):
     globalenv.update({
+        'quit': primitivequit,
+        '+': primitiveadd,
         })
     return globalenv
 
 globalenv = addtoglobal(makeenv())
 
+def apply(sexp, env=globalenv):
+    op = eval(sexp[0], env)
+    args = []
+    for exp in sexp[1:]:
+        args.append(eval(exp, env))
+    print(args)
+    return op(*args)
+
 def eval(sexp, env=globalenv):
     if islist(sexp):
-        if sexp[0] == 'quit':
-            raise KeyboardInterrupt
+        if sexp[0] == 'lambda':
+            return Lambda(env, sexp[1], sexp[2])
         elif sexp[0] == 'quote':
             return sexp[1]
-        elif sexp[0] == '+':
-            return sum(sexp[1:])
-        elif sexp[0] == 'cond':
-            for exp in sexp[1:]:
-                if eval(exp[0], env):
-                    return eval(exp[1], env)
-        elif sexp[0] == '<':
-            return eval(sexp[1], env) < eval(sexp[2], env)
-        elif sexp[0] == '>':
-            return eval(sexp[1], env) > eval(sexp[2], env)
-        elif sexp[0] == '<=':
-            return eval(sexp[1], env) <= eval(sexp[2], env)
-        elif sexp[0] == '>=':
-            return eval(sexp[1], env) >= eval(sexp[2], env)
-        elif sexp[0] == 'lambda':
-            pass
         else:
-            op = find(sexp[0], globalenv)
-            return op(*sexp[1:])
+            print(sexp)
+            return apply(sexp, env)
     elif isnumber(sexp):
         return sexp
     elif sexp == '#t':
         return True
     elif sexp == '#f':
         return False
-    # isidentifier
     else:
         return find(sexp, env)
+
+class Lambda:
+    def __init__(self, env, arglist, sexp):
+        self.arglist = arglist
+        self.sexp = sexp
+        self.env = env
+    def __call__(self, *arg, **kwarg):
+        if len(arg) != len(self.arglist):
+            raise TypeError("Expected {0} arguments ({1} provided)".format(len(self.arglist), len(arg)))
+        localenv = dict(zip(self.arglist, arg))
+        localenv.update({'outer': self.env})
+        return eval(self.sexp, localenv)
 
 def error(s):
     print('ERROR:', s)
@@ -171,6 +182,7 @@ def find(sym, env):
         else:
             return find(sym, env['outer'])
     except TypeError:
+        # once hit here, sym is nowhere to be found
         raise NameError("Undefined atom {0!r}".format(sym))
 
 def REPL():
