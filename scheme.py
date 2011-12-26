@@ -144,6 +144,31 @@ def primitivenot(a):
 def primitiveeqn(a, b):
     return a == b
 
+def primitivezerop(a):
+    return a == 0
+
+def primitivenullp(a):
+    return a == []
+
+def primitivecons(a, b):
+    b.insert(0, a)
+    return b
+
+def primitivecar(a):
+    return a[0]
+
+def primitivecdr(a):
+    return a[1:]
+
+def primitiveatomp(a):
+    return isinstance(a, str)
+
+def primitiveor(*args):
+    return any(args)
+
+def primitiveand(*args):
+    return all(args)
+
 def makeenv(outer=None):
     """
     Make an empty environment with the outer environment specified
@@ -163,7 +188,15 @@ def addtoglobal(globalenv):
         '>': primitivegt,
         '=': primitiveeqn,
         'eq?': primitiveeqn,
+        'zero?': primitivezerop,
+        'null?': primitivenullp,
+        'atom?': primitiveatomp,
+        'and': primitiveand,
+        'or': primitiveor,
         'not': primitivenot,
+        'cons': primitivecons,
+        'car': primitivecar,
+        'cdr': primitivecdr,
         'else': True
         })
     return globalenv

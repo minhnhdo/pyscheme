@@ -7,18 +7,40 @@ Inspiration drawn much from The Little Schemer by Daniel P. Friedman and Mathias
 + Atoms (as strings)
 + Lists (as Python lists)
 + Primitive functions/forms:
-    + Additions (+ &lt;arg1&gt; &lt;arg2&gt; ...) implemented with the sum function
-    + Multiplications (\* &lt;arg1&gt; &lt;arg2&gt; ...)
-    + Difference (\* &lt;arg1&gt; &lt;arg2&gt; ...) which takes at least 1 argument
-    + Divisions (/ &lt;arg1&gt; &lt;arg2&gt; ...) which takes at least 1 argument
-    + Predicates: &gt;, &lt;, =, not, eq?
-    + Quotes (quote &lt;arg&gt;)
-    + Begins (begin &lt;arg1&gt; &lt;arg2&gt; ...) which will evaluate to the value of the last s-expression
-    + Lambdas (lambda (&lt;arglist&gt;) &lt;sexps&gt;)
-    + Conditions (cond (&lt;cond1&gt; &lt;sexps1&gt;) (&lt;cond1&gt; &lt;sexps1&gt;) ...)
+    + List manipulation:
+
+            (cons a b)
+            (car l)
+            (cdr l)
+    + Additions implemented with the sum function:
+
+            (+ &lt;arg1&gt; &lt;arg2&gt; ...)
+    + Multiplications:
+
+            (\* &lt;arg1&gt; &lt;arg2&gt; ...)
+    + Difference which takes at least 1 argument:
+
+            (\* &lt;arg1&gt; &lt;arg2&gt; ...)
+    + Divisions which takes at least 1 argument:
+
+            (/ &lt;arg1&gt; &lt;arg2&gt; ...)
+    + Predicates: &gt;, &lt;, =, not, eq?, null?, atom?, zero?
+    + Connectives: and, or
+    + Quotes
+
+            (quote &lt;arg&gt;)
+    + Begins which will evaluate to the value of the last s-expression:
+
+            (begin &lt;arg1&gt; &lt;arg2&gt; ...)
+    + Lambdas
+
+            (lambda (&lt;arglist&gt;) &lt;sexps&gt;)
+    + Conditions
+
+            (cond (&lt;cond1&gt; &lt;sexps1&gt;) (&lt;cond1&gt; &lt;sexps1&gt;) ...)
 
 # Notes #
-1. Currently, the number of provided arguments isn't checked, except for lambdas (which will raise a TypeError), division along with difference (which demands at least 1 argument and will also raise a TypeError if this is not met). Thus,  
+1. Currently, the number of provided arguments isn't checked, except for lambdas (which will raise a TypeError). Thus,
 
         (quote a b) --> 'a'
         (/) --> TypeError: Expected at least 1 arguments (0 provided)
