@@ -21,4 +21,4 @@ Inspiration drawn much from The Little Schemer by Daniel P. Friedman and Mathias
         ((lambda (x) (+ x 1) (- x 5)) 5) --> 6
 3. Because of Python's duck typing, this is possible:  
 
-        (* 'a' (quote 2)) --> 'aa'
+        (* 2 (quote a)) --> 'aa'
