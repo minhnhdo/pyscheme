@@ -160,6 +160,32 @@ def addtoglobal(globalenv):
 
 globalenv = addtoglobal(makeenv())
 
+def evalbegin(sexp, env=globalenv):
+    for exp in sexp[1:-1]:
+        eval(exp, env)
+    return eval(sexp[-1], env)
+
+def evalquote(sexp, env=globalenv):
+    return sexp[1]
+
+def evallambda(sexp, env=globalenv):
+    exps = sexp[2:]
+    exps.insert(0, 'begin')
+    return Lambda(env, sexp[1], exps)
+
+def evalcond(sexp, env=globalenv):
+    for cond, *exp in sexp[1:]:
+        if eval(cond, env):
+            exp.insert(0, 'begin')
+            return eval(exp, env)
+
+evalto = {
+        'begin': evalbegin,
+        'quote': evalquote,
+        'lambda': evallambda,
+        'cond': evalcond
+        }
+
 def apply(sexp, env=globalenv):
     op = eval(sexp[0], env)
     args = []
@@ -169,29 +195,17 @@ def apply(sexp, env=globalenv):
 
 def eval(sexp, env=globalenv):
     if islist(sexp):
-        if sexp[0] == 'begin':
-            for exp in sexp[1:-1]:
-                eval(exp, env)
-            return eval(sexp[-1], env)
-        elif sexp[0] == 'quote':
-            return sexp[1]
-        elif sexp[0] == 'lambda':
-            exps = sexp[2:]
-            exps.insert(0, 'begin')
-            return Lambda(env, sexp[1], exps)
-        elif sexp[0] == 'cond':
-            for cond, *exp in sexp[1:]:
-                if eval(cond, env):
-                    exp.insert(0, 'begin')
-                    return eval(exp, env)
-        else:
+        try:
+            func = evalto[sexp[0]]
+            return func(sexp, env)
+        except (KeyError, TypeError):
             return apply(sexp, env)
-    elif isnumber(sexp):
-        return sexp
     elif sexp == '#t':
         return True
     elif sexp == '#f':
         return False
+    elif isnumber(sexp):
+        return sexp
     else:
         return find(sexp, env)
 
