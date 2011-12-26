@@ -163,12 +163,6 @@ def primitivecdr(a):
 def primitiveatomp(a):
     return isinstance(a, str)
 
-def primitiveor(*args):
-    return any(args)
-
-def primitiveand(*args):
-    return all(args)
-
 def makeenv(outer=None):
     """
     Make an empty environment with the outer environment specified
@@ -191,8 +185,6 @@ def addtoglobal(globalenv):
         'zero?': primitivezerop,
         'null?': primitivenullp,
         'atom?': primitiveatomp,
-        'and': primitiveand,
-        'or': primitiveor,
         'not': primitivenot,
         'cons': primitivecons,
         'car': primitivecar,
@@ -230,12 +222,26 @@ def evaldefine(sexp, env=globalenv):
         })
     return defn
 
+def evaland(sexp, env=globalenv):
+    for exp in sexp[1:]:
+        if not eval(exp, env):
+            return False
+    return True
+
+def evalor(exp, env=globalenv):
+    for exp in sexp[1:]:
+        if eval(exp, env):
+            return True
+    return False
+
 evalto.update({
         'begin': evalbegin,
         'quote': evalquote,
         'lambda': evallambda,
         'cond': evalcond,
-        'define': evaldefine
+        'define': evaldefine,
+        'and': evaland,
+        'or': evalor
         })
 
 def apply(sexp, env=globalenv):
