@@ -14,30 +14,30 @@ Inspiration drawn much from The Little Schemer by Daniel P. Friedman and Mathias
             (cdr l)
     + Additions implemented with the sum function:
 
-            (+ &lt;arg1&gt; &lt;arg2&gt; ...)
+            (+ <arg1> <arg2> ...)
     + Multiplications:
 
-            (\* &lt;arg1&gt; &lt;arg2&gt; ...)
+            (* <arg1> <arg2> ...)
     + Difference which takes at least 1 argument:
 
-            (\* &lt;arg1&gt; &lt;arg2&gt; ...)
+            (- <arg1> <arg2> ...)
     + Divisions which takes at least 1 argument:
 
-            (/ &lt;arg1&gt; &lt;arg2&gt; ...)
+            (/ <arg1> <arg2> ...)
     + Predicates: &gt;, &lt;, =, not, eq?, null?, atom?, zero?
     + Connectives: and, or
     + Quotes
 
-            (quote &lt;arg&gt;)
+            (quote <arg>)
     + Begins which will evaluate to the value of the last s-expression:
 
-            (begin &lt;arg1&gt; &lt;arg2&gt; ...)
+            (begin <arg1> <arg2> ...)
     + Lambdas
 
-            (lambda (&lt;arglist&gt;) &lt;sexps&gt;)
+            (lambda (<arglist>) <sexps>)
     + Conditions
 
-            (cond (&lt;cond1&gt; &lt;sexps1&gt;) (&lt;cond1&gt; &lt;sexps1&gt;) ...)
+            (cond (<cond1> <sexps1>) (<cond1> <sexps1>) ...)
 
 # Notes #
 1. Currently, the number of provided arguments isn't checked, except for lambdas (which will raise a TypeError). Thus,
