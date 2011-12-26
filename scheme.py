@@ -153,7 +153,8 @@ def addtoglobal(globalenv):
         '+': primitiveadd,
         '*': primitivemult,
         '-': primitivediff,
-        '/': primitivediv
+        '/': primitivediv,
+        'else': True
         })
     return globalenv
 
@@ -168,16 +169,21 @@ def apply(sexp, env=globalenv):
 
 def eval(sexp, env=globalenv):
     if islist(sexp):
-        if sexp[0] == 'lambda':
+        if sexp[0] == 'begin':
+            for exp in sexp[1:-1]:
+                eval(exp, env)
+            return eval(sexp[-1], env)
+        elif sexp[0] == 'quote':
+            return sexp[1]
+        elif sexp[0] == 'lambda':
             exps = sexp[2:]
             exps.insert(0, 'begin')
             return Lambda(env, sexp[1], exps)
-        elif sexp[0] == 'begin':
-            for exp in sexp[1:-1]:
-                eval(exp, env)
-                return eval(sexp[-1], env)
-        elif sexp[0] == 'quote':
-            return sexp[1]
+        elif sexp[0] == 'cond':
+            for cond, *exp in sexp[1:]:
+                if eval(cond, env):
+                    exp.insert(0, 'begin')
+                    return eval(exp, env)
         else:
             return apply(sexp, env)
     elif isnumber(sexp):
