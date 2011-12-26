@@ -12,7 +12,7 @@ Inspiration drawn much from The Little Schemer by Daniel P. Friedman and Mathias
     + Difference (\* &lt;arg1&gt; &lt;arg2&gt; ...) which takes at least 1 argument
     + Divisions (/ &lt;arg1&gt; &lt;arg2&gt; ...) which takes at least 1 argument
     + Quotes (quote &lt;arg&gt;)
-    + Begins (begin &lt;arg1&gt; &lt;arg2&gt; ...) which will return the value of the last s-expression
+    + Begins (begin &lt;arg1&gt; &lt;arg2&gt; ...) which will evaluate to the value of the last s-expression
     + Lambdas (lambda (&lt;arglist&gt;) &lt;sexps&gt;)
     + Conditions (cond (&lt;cond1&gt; &lt;sexps1&gt;) (&lt;cond1&gt; &lt;sexps1&gt;) ...)
 
