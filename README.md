@@ -8,17 +8,17 @@ Inspiration drawn much from The Little Schemer by Daniel P. Friedman and Mathias
 + Lists (as Python lists)
 + Primitive functions/forms:
     + Additions (+ &lt;arg1&gt; &lt;arg2&gt; ...) implemented with the sum function
-    + Products (\* &lt;arg1&gt; &lt;arg2&gt; ...)
+    + Multiplications (\* &lt;arg1&gt; &lt;arg2&gt; ...)
+    + Difference (\* &lt;arg1&gt; &lt;arg2&gt; ...) which takes at least 1 argument
+    + Divisions (/ &lt;arg1&gt; &lt;arg2&gt; ...) which takes at least 1 argument
     + Quotes (quote &lt;arg&gt;)
     + Lambdas (lambda (&lt;arglist&gt;) &lt;sexp&gt;)
 
 # Notes #
-1. Currently, the number of provided arguments isn't checked, except for lambdas (which will raise a TypeError). Thus,  
+1. Currently, the number of provided arguments isn't checked, except for lambdas (which will raise a TypeError), division along with difference (which demands at least 1 argument and will also raise a TypeError if this is not met). Thus,  
 
         (quote a b) --> 'a'
-2. The bodies of lambdas only accept one s-expression each (this can be fixed, temporarily, with a begin function). Therefore,  
-
-        ((lambda (x) (+ x 1) (- x 5)) 5) --> 6
-3. Because of Python's duck typing, this is possible:  
+        (/) --> TypeError: Expected at least 1 arguments (0 provided)
+2. Because of Python's duck typing, this is possible:  
 
         (* 2 (quote a)) --> 'aa'

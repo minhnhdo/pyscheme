@@ -112,6 +112,33 @@ def primitivequit():
 def primitiveadd(*args):
     return sum(args)
 
+def primitivemult(*args):
+    retval = 1
+    for i in args:
+        retval *= i
+    return retval
+
+def primitivediff(*args):
+    length = len(args)
+    if length < 1:
+        raise TypeError("Expected at least 1 arguments ({0} provided)".format(len(args)))
+    # inversion
+    elif length == 1:
+        return -args[0]
+
+    retval = args[0]
+    for i in args[1:]:
+        retval -= i
+    return retval
+
+def primitivediv(*args):
+    if len(args) < 1:
+        raise TypeError("Expected at least 1 arguments ({0} provided)".format(len(args)))
+    retval = args[0]
+    for i in args[1:]:
+        retval /= i
+    return retval
+
 def makeenv(outer=None):
     """
     Make an empty environment with the outer environment specified
@@ -124,6 +151,9 @@ def addtoglobal(globalenv):
     globalenv.update({
         'quit': primitivequit,
         '+': primitiveadd,
+        '*': primitivemult,
+        '-': primitivediff,
+        '/': primitivediv
         })
     return globalenv
 
@@ -134,17 +164,21 @@ def apply(sexp, env=globalenv):
     args = []
     for exp in sexp[1:]:
         args.append(eval(exp, env))
-    print(args)
     return op(*args)
 
 def eval(sexp, env=globalenv):
     if islist(sexp):
         if sexp[0] == 'lambda':
-            return Lambda(env, sexp[1], sexp[2])
+            exps = sexp[2:]
+            exps.insert(0, 'begin')
+            return Lambda(env, sexp[1], exps)
+        elif sexp[0] == 'begin':
+            for exp in sexp[1:-1]:
+                eval(exp, env)
+                return eval(sexp[-1], env)
         elif sexp[0] == 'quote':
             return sexp[1]
         else:
-            print(sexp)
             return apply(sexp, env)
     elif isnumber(sexp):
         return sexp
@@ -163,8 +197,8 @@ class Lambda:
     def __call__(self, *arg, **kwarg):
         if len(arg) != len(self.arglist):
             raise TypeError("Expected {0} arguments ({1} provided)".format(len(self.arglist), len(arg)))
-        localenv = dict(zip(self.arglist, arg))
-        localenv.update({'outer': self.env})
+        localenv = makeenv(self.env)
+        localenv.update(dict(zip(self.arglist, arg)))
         return eval(self.sexp, localenv)
 
 def error(s):
