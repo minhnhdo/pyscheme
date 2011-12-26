@@ -1,6 +1,9 @@
 ﻿## a subset of scheme
 
-import functools
+try:
+    input = raw_input
+except NameError:
+    pass
 
 class Tokenizer:
     """
@@ -210,7 +213,9 @@ def evallambda(sexp, env=globalenv):
     return Lambda(env, sexp[1], exps)
 
 def evalcond(sexp, env=globalenv):
-    for cond, *exp in sexp[1:]:
+    for cond_exp in sexp[1:]:
+        cond = cond_exp[0]
+        exp = cond_exp[1:]
         if eval(cond, env):
             exp.insert(0, 'begin')
             return eval(exp, env)
