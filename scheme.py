@@ -86,10 +86,6 @@ def parse_sexp(tokens):
     else:
         return parse_atom(tok)
 
-def read():
-    inp = input('* ')
-    return parse_sexp(Tokenizer(inp))
-
 def isatom(a):
     if isinstance(a, int):
         return True
@@ -307,10 +303,15 @@ def find(sym, env):
 def REPL():
     try:
         while True:
-            #try:
-                print(eval(read()))
-            #except NameError as e:
-            #    print('{0}: {1}'.format(e.__class__, str(e)))
+            inp = input('* ')
+            while True:
+                tokens = Tokenizer(inp)
+                try:
+                    sexp = parse_sexp(tokens)
+                    break
+                except SyntaxError:
+                    inp += ' ' + input('  ')
+            print(eval(sexp))
     except (KeyboardInterrupt, EOFError):
         print("Exiting... Bye!")
 
