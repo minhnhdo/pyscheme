@@ -1,12 +1,5 @@
 ﻿## a subset of scheme
 
-# import itertools
-
-# def tokenizer(s):
-#     tokens = s.replace('(', ' ( ').replace(')', ' ) ').split()
-#     for tok in tokens:
-#         yield tok
-
 import functools
 
 class Tokenizer:
@@ -98,7 +91,7 @@ def isatom(a):
     if isinstance(a, int):
         return True
     else:
-        return not isinstance(a, float)
+        return isinstance(a, str)
 
 def isnumber(a):
     return isinstance(a, int) or isinstance(a, float)
@@ -139,6 +132,18 @@ def primitivediv(*args):
         retval /= i
     return retval
 
+def primitivelt(a, b):
+    return a < b
+
+def primitivegt(a, b):
+    return a > b
+
+def primitivenot(a):
+    return not a
+
+def primitiveeqn(a, b):
+    return a == b
+
 def makeenv(outer=None):
     """
     Make an empty environment with the outer environment specified
@@ -154,11 +159,17 @@ def addtoglobal(globalenv):
         '*': primitivemult,
         '-': primitivediff,
         '/': primitivediv,
+        '<': primitivelt,
+        '>': primitivegt,
+        '=': primitiveeqn,
+        'eq?': primitiveeqn,
+        'not': primitivenot,
         'else': True
         })
     return globalenv
 
-globalenv = addtoglobal(makeenv())
+evalto = makeenv()
+globalenv = addtoglobal(makeenv(evalto))
 
 def evalbegin(sexp, env=globalenv):
     for exp in sexp[1:-1]:
@@ -179,12 +190,20 @@ def evalcond(sexp, env=globalenv):
             exp.insert(0, 'begin')
             return eval(exp, env)
 
-evalto = {
+def evaldefine(sexp, env=globalenv):
+    defn = eval(sexp[2], env)
+    env.update({
+        sexp[1]: defn
+        })
+    return defn
+
+evalto.update({
         'begin': evalbegin,
         'quote': evalquote,
         'lambda': evallambda,
-        'cond': evalcond
-        }
+        'cond': evalcond,
+        'define': evaldefine
+        })
 
 def apply(sexp, env=globalenv):
     op = eval(sexp[0], env)
@@ -214,6 +233,8 @@ class Lambda:
         self.arglist = arglist
         self.sexp = sexp
         self.env = env
+    def __repr__(self):
+        return '<function <lambda> at 0x{0:x}>'.format(id(self))
     def __call__(self, *arg, **kwarg):
         if len(arg) != len(self.arglist):
             raise TypeError("Expected {0} arguments ({1} provided)".format(len(self.arglist), len(arg)))
