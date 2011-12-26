@@ -228,7 +228,7 @@ def evaland(sexp, env=globalenv):
             return False
     return True
 
-def evalor(exp, env=globalenv):
+def evalor(sexp, env=globalenv):
     for exp in sexp[1:]:
         if eval(exp, env):
             return True
