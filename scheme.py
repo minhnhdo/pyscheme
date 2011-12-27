@@ -5,6 +5,8 @@ try:
 except NameError:
     pass
 
+import copy
+
 class Tokenizer:
     """
     Turn a string into a list of tokens
@@ -201,6 +203,7 @@ def evalbegin(sexp, env=globalenv):
     return eval(sexp[-1], env)
 
 def evalquote(sexp, env=globalenv):
+    print(sexp)
     return sexp[1]
 
 def evallambda(sexp, env=globalenv):
@@ -272,15 +275,15 @@ class Lambda:
     def __init__(self, env, arglist, sexp):
         self.arglist = arglist
         self.sexp = sexp
-        self.env = env
+        self.outerenv = env
     def __repr__(self):
         return '<function <lambda> at 0x{0:x}>'.format(id(self))
     def __call__(self, *arg, **kwarg):
         if len(arg) != len(self.arglist):
             raise TypeError("Expected {0} arguments ({1} provided)".format(len(self.arglist), len(arg)))
-        localenv = makeenv(self.env)
+        localenv = makeenv(self.outerenv)
         localenv.update(dict(zip(self.arglist, arg)))
-        return eval(self.sexp, localenv)
+        return eval(copy.deepcopy(self.sexp), localenv)
 
 def error(s):
     print('ERROR:', s)
