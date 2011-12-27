@@ -29,6 +29,7 @@ Inspiration drawn much from The Little Schemer by Daniel P. Friedman and Mathias
     + Quotes
 
             (quote <arg>)
+            '<arg>
     + Begins which will evaluate to the value of the last s-expression:
 
             (begin <arg1> <arg2> ...)

@@ -13,6 +13,8 @@ class Tokenizer:
     def __init__(self, s):
         # separating open and close parens
         s = s.replace('(', ' ( ').replace(')', ' ) ')
+        # separating quotes
+        s = s.replace("'", " ' ")
 
         self.tokens = s.split()
         self.counter = 0
@@ -75,16 +77,18 @@ def parse_sexp(tokens):
     Output: an atom if first of stream represents a token
             a list if first of stream represents a list
     """
-
     try:
         tok = next(tokens)
+        if tok == '(':
+            return parse_list(tokens)
+        if tok == "'":
+            retval = ['quote']
+            retval.append(parse_sexp(tokens))
+            return retval
+        else:
+            return parse_atom(tok)
     except (StopIteration, IndexError):
         return
-
-    if tok == '(':
-        return parse_list(tokens)
-    else:
-        return parse_atom(tok)
 
 def isatom(a):
     if isinstance(a, int):
