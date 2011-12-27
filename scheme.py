@@ -5,8 +5,6 @@ try:
 except NameError:
     pass
 
-import copy
-
 class Tokenizer:
     """
     Turn a string into a list of tokens
@@ -152,8 +150,9 @@ def primitivenullp(a):
     return a == []
 
 def primitivecons(a, b):
-    b.insert(0, a)
-    return b
+    retval = [a]
+    retval.extend(b)
+    return retval
 
 def primitivecar(a):
     return a[0]
@@ -203,7 +202,6 @@ def evalbegin(sexp, env=globalenv):
     return eval(sexp[-1], env)
 
 def evalquote(sexp, env=globalenv):
-    print(sexp)
     return sexp[1]
 
 def evallambda(sexp, env=globalenv):
@@ -283,7 +281,7 @@ class Lambda:
             raise TypeError("Expected {0} arguments ({1} provided)".format(len(self.arglist), len(arg)))
         localenv = makeenv(self.outerenv)
         localenv.update(dict(zip(self.arglist, arg)))
-        return eval(copy.deepcopy(self.sexp), localenv)
+        return eval(self.sexp, localenv)
 
 def error(s):
     print('ERROR:', s)
