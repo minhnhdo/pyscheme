@@ -1,6 +1,10 @@
 # A subset of scheme #
 Inspiration drawn much from The Little Schemer by Daniel P. Friedman and Mathias Felleisen
 
+# What is does #
+This little Python program tries to evaluate Scheme (a Lispy language) code.
+When run using ```python scheme.py```, it provides a (rudimentary) Read-Eval-Print Loop.
+
 # Currently working features: #
 + Truth values, i.e. #t and #f
 + Numbers, i.e. integers and floats
