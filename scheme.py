@@ -88,7 +88,7 @@ def parse_sexp(tokens):
         else:
             return parse_atom(tok)
     except (StopIteration, IndexError):
-        return
+        raise SyntaxError("Unexpected end of token stream")
 
 def isatom(a):
     if isinstance(a, int):
@@ -279,7 +279,7 @@ class Lambda:
         self.sexp = sexp
         self.outerenv = env
     def __repr__(self):
-        return '<function <lambda> at 0x{0:x}>'.format(id(self))
+        return '<compound function at 0x{0:x}>'.format(id(self))
     def __call__(self, *arg, **kwarg):
         if len(arg) != len(self.arglist):
             raise TypeError("Expected {0} arguments ({1} provided)".format(len(self.arglist), len(arg)))
@@ -301,13 +301,13 @@ def find(sym, env):
             return env[sym]
         else:
             return find(sym, env['outer'])
-    except TypeError:
+    except TypeError as e:
         # once hit here, sym is nowhere to be found
         raise NameError("Undefined atom {0!r}".format(sym))
 
 def REPL():
-    try:
-        while True:
+    while True:
+        try:
             inp = input('* ')
             while True:
                 tokens = Tokenizer(inp)
@@ -317,8 +317,11 @@ def REPL():
                 except SyntaxError:
                     inp += ' ' + input('  ')
             print(eval(sexp))
-    except (KeyboardInterrupt, EOFError):
-        print("Exiting... Bye!")
+        except (KeyboardInterrupt, EOFError):
+            print("Exiting... Bye!")
+            return
+        except Exception as e:
+            print(str(e))
 
 if __name__ == '__main__':
     REPL()
