@@ -262,6 +262,9 @@ def eval(sexp, env=globalenv):
         try:
             func = evalto[sexp[0]]
             return func(sexp, env)
+        except IndexError:
+            # user entered empty list
+            return []
         except (KeyError, TypeError):
             return apply(sexp, env)
     elif sexp == '#t':
