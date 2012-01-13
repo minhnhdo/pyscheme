@@ -8,6 +8,10 @@ try:
 except NameError:
     pass
 
+class List(list):
+    def __repr__(self):
+        return '(' + ' '.join(map(str, self)) + ')'
+
 class Tokenizer:
     """
     Turn a string into a list of tokens
@@ -49,7 +53,7 @@ def parse_list(tokens):
     Exceptions: when reaching the end of token stream, raise SyntaxError since the close parens token is missing
     """
 
-    retval = []
+    retval = List()
     for tok in tokens:
         if tok == ')':
             return retval
@@ -85,7 +89,7 @@ def parse_sexp(tokens):
         if tok == '(':
             return parse_list(tokens)
         if tok == "'":
-            retval = ['quote']
+            retval = List(['quote'])
             retval.append(parse_sexp(tokens))
             return retval
         else:
