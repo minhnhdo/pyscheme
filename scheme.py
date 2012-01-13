@@ -167,9 +167,7 @@ def eval(sexp, env=globalenv):
                     return eval(exp, env)
         elif op == 'define':
             defn = eval(sexp[2], env)
-            env.update({
-                sexp[1]: defn
-                })
+            env.update({sexp[1]: defn})
             return defn
         elif op == 'and':
             for exp in sexp[1:]:
@@ -203,7 +201,7 @@ class Lambda:
         self.outerenv = env
     def __repr__(self):
         return '<compound function at 0x{0:x}>'.format(id(self))
-    def __call__(self, *arg, **kwarg):
+    def __call__(self, *arg):
         if len(arg) != len(self.arglist):
             raise TypeError("Expected {0} arguments ({1} provided)".format(len(self.arglist), len(arg)))
         localenv = makeenv(self.outerenv)
