@@ -1,4 +1,4 @@
-﻿def islist(a):
+def islist(a):
     return isinstance(a, list)
 
 def isnumber(a):

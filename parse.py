@@ -1,4 +1,4 @@
-﻿class Tokenizer:
+class Tokenizer:
     """
     Turn a string into a list of tokens
     Have the ability to rollback using the rollback instance method

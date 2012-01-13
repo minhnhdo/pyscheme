@@ -1,153 +1,15 @@
-﻿## a subset of scheme
+## a subset of scheme
 
 from __future__ import division
-from functools import reduce
+
+from parse import parse, Tokenizer
+from env import globalenv, Env
+from primitives import islist, isbool, isatom, isnumber
 
 try:
     input = raw_input
 except NameError:
     pass
-
-class List(list):
-    def __repr__(self):
-        return '(' + ' '.join(map(str, self)) + ')'
-
-class Tokenizer:
-    """
-    Turn a string into a list of tokens
-    Have the ability to rollback using the rollback instance method
-    """
-    def __init__(self, s):
-        # separating open and close parens
-        s = s.replace('(', ' ( ').replace(')', ' ) ')
-        # separating quotes
-        s = s.replace("'", " ' ")
-
-        self.tokens = s.split()
-        self.counter = 0
-
-    def __next__(self):
-        self.counter += 1
-        try:
-            return self.tokens[self.counter - 1]
-        except IndexError:
-            raise StopIteration
-
-    # for compatibility
-    next = __next__
-
-    def __iter__(self):
-        return self
-
-    def rollback(self):
-        """
-        Rollback one token
-        """
-        self.counter -= 1
-        return self
-
-def parse_list(tokens):
-    """
-    Input: a stream of tokens that contains the content of a list
-    Output: a list representing that Scheme list
-    Exceptions: when reaching the end of token stream, raise SyntaxError since the close parens token is missing
-    """
-
-    retval = List()
-    for tok in tokens:
-        if tok == ')':
-            return retval
-        else:
-            retval.append(parse_sexp(tokens.rollback()))
-    raise SyntaxError("Unexpected end of token stream")
-
-def parse_atom(token):
-    """
-    Input: a token
-    Output: an represented atom
-
-    Try to turn the token into a number, else just return it
-    """
-    try:
-        return int(token)
-    except ValueError:
-        try:
-            return float(token)
-        except ValueError:
-            return token
-    return token
-    
-
-def parse_sexp(tokens):
-    """
-    Input: a stream of tokens
-    Output: an atom if first of stream represents a token
-            a list if first of stream represents a list
-    """
-    try:
-        tok = next(tokens)
-        if tok == '(':
-            return parse_list(tokens)
-        if tok == "'":
-            retval = List(['quote'])
-            retval.append(parse_sexp(tokens))
-            return retval
-        else:
-            return parse_atom(tok)
-    except (StopIteration, IndexError):
-        raise SyntaxError("Unexpected end of token stream")
-
-def isatom(a):
-    if isinstance(a, int):
-        return True
-    else:
-        return isinstance(a, str)
-
-def isnumber(a):
-    return isinstance(a, int) or isinstance(a, float)
-
-def islist(l):
-    return isinstance(l, list)
-
-def primitivequit():
-    raise KeyboardInterrupt
-
-def primitivecons(a, b):
-    retval = [a]
-    retval.extend(b)
-    return retval
-
-def makeenv(outer=None):
-    """
-    Make an empty environment with the outer environment specified
-    """
-
-    retval = {'outer': outer}
-    return retval
-
-def addtoglobal(env):
-    env.update({
-        'quit': primitivequit,
-        '+': lambda *args: sum(args),
-        '*': lambda *args: reduce(lambda x, y: x * y, args, 1),
-        '-': lambda *args: -args[0] if len(args) == 0 else args[0] - sum(args[1:]),
-        '/': lambda *args: reduce(lambda x, y: x / y, args[1:], args[0]),
-        '<': lambda x, y: x < y,
-        '>': lambda x, y: x > y,
-        '=': lambda x, y: x == y,
-        'eq?': lambda x, y: x == y,
-        'zero?': lambda x: x == 0,
-        'null?': lambda x: x == [],
-        'atom?': lambda x: isinstance(x, str),
-        'not': lambda x: not x,
-        'cons': primitivecons,
-        'car': lambda l: l[0],
-        'cdr': lambda l: l[1:],
-        'else': True
-        })
-    return env
-
-globalenv = addtoglobal(makeenv())
 
 def eval(sexp, env=globalenv):
     if islist(sexp):
@@ -196,7 +58,7 @@ def eval(sexp, env=globalenv):
     elif isnumber(sexp):
         return sexp
     else:
-        return find(sexp, env)
+        return env.find(sexp)
 
 class Lambda:
     def __init__(self, env, arglist, sexp):
@@ -208,37 +70,29 @@ class Lambda:
     def __call__(self, *arg):
         if len(arg) != len(self.arglist):
             raise TypeError("Expected {0} arguments ({1} provided)".format(len(self.arglist), len(arg)))
-        localenv = makeenv(self.outerenv)
+        localenv = Env(self.outerenv)
         localenv.update(dict(zip(self.arglist, arg)))
         return eval(self.sexp, localenv)
 
-def find(sym, env):
-    """
-    Find a symbol in env
-    If symbol not in env or any of its outer, return None
-    """
-
-    try:
-        if sym in env:
-            return env[sym]
-        else:
-            return find(sym, env['outer'])
-    except TypeError:
-        # once hit here, sym is nowhere to be found
-        raise NameError("Undefined atom {0!r}".format(sym))
+def tostring(a):
+    if islist(a):
+        return '(' + ' '.join(map(str, a)) + ')'
+    elif isbool(a):
+        return '#t' if a else '#f'
+    else:
+        return str(a)
 
 def REPL():
     while True:
         try:
             inp = input('* ')
             while True:
-                tokens = Tokenizer(inp)
                 try:
-                    sexp = parse_sexp(tokens)
+                    sexp = parse(inp)
                     break
                 except SyntaxError:
                     inp += ' ' + input('  ')
-            print(eval(sexp))
+            print(tostring(eval(sexp)))
         except (KeyboardInterrupt, EOFError):
             print("Exiting... Bye!")
             return

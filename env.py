@@ -1,4 +1,4 @@
-﻿import math, operator
+import math, operator
 from functools import reduce
 
 from primitives import islist, isbool, isatom, isnumber
