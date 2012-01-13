@@ -1,5 +1,8 @@
 ﻿## a subset of scheme
 
+from __future__ import division
+from functools import reduce
+
 try:
     input = raw_input
 except NameError:
@@ -105,42 +108,6 @@ def islist(l):
 def primitivequit():
     raise KeyboardInterrupt
 
-def primitiveadd(*args):
-    return sum(args)
-
-def primitivemult(*args):
-    retval = 1
-    for i in args:
-        retval *= i
-    return retval
-
-def primitivediff(*args):
-    length = len(args)
-    if length < 1:
-        raise TypeError("Expected at least 1 arguments ({0} provided)".format(len(args)))
-    # inversion
-    elif length == 1:
-        return -args[0]
-
-    retval = args[0]
-    for i in args[1:]:
-        retval -= i
-    return retval
-
-def primitivediv(*args):
-    if len(args) < 1:
-        raise TypeError("Expected at least 1 arguments ({0} provided)".format(len(args)))
-    retval = args[0]
-    for i in args[1:]:
-        retval /= i
-    return retval
-
-def primitivezerop(a):
-    return a == 0
-
-def primitivenullp(a):
-    return a == []
-
 def primitivecons(a, b):
     retval = [a]
     retval.extend(b)
@@ -157,16 +124,16 @@ def makeenv(outer=None):
 def addtoglobal(env):
     env.update({
         'quit': primitivequit,
-        '+': primitiveadd,
-        '*': primitivemult,
-        '-': primitivediff,
-        '/': primitivediv,
+        '+': lambda *args: sum(args),
+        '*': lambda *args: reduce(lambda x, y: x * y, args, 1),
+        '-': lambda *args: -args[0] if len(args) == 0 else args[0] - sum(args[1:]),
+        '/': lambda *args: reduce(lambda x, y: x / y, args[1:], args[0]),
         '<': lambda x, y: x < y,
         '>': lambda x, y: x > y,
         '=': lambda x, y: x == y,
         'eq?': lambda x, y: x == y,
-        'zero?': primitivezerop,
-        'null?': primitivenullp,
+        'zero?': lambda x: x == 0,
+        'null?': lambda x: x == [],
         'atom?': lambda x: isinstance(x, str),
         'not': lambda x: not x,
         'cons': primitivecons,
@@ -177,7 +144,6 @@ def addtoglobal(env):
     return env
 
 globalenv = addtoglobal(makeenv())
-
 
 def eval(sexp, env=globalenv):
     if islist(sexp):
