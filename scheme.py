@@ -135,18 +135,6 @@ def primitivediv(*args):
         retval /= i
     return retval
 
-def primitivelt(a, b):
-    return a < b
-
-def primitivegt(a, b):
-    return a > b
-
-def primitivenot(a):
-    return not a
-
-def primitiveeqn(a, b):
-    return a == b
-
 def primitivezerop(a):
     return a == 0
 
@@ -158,15 +146,6 @@ def primitivecons(a, b):
     retval.extend(b)
     return retval
 
-def primitivecar(a):
-    return a[0]
-
-def primitivecdr(a):
-    return a[1:]
-
-def primitiveatomp(a):
-    return isinstance(a, str)
-
 def makeenv(outer=None):
     """
     Make an empty environment with the outer environment specified
@@ -175,36 +154,30 @@ def makeenv(outer=None):
     retval = {'outer': outer}
     return retval
 
-def addtoglobal(globalenv):
-    globalenv.update({
+def addtoglobal(env):
+    env.update({
         'quit': primitivequit,
         '+': primitiveadd,
         '*': primitivemult,
         '-': primitivediff,
         '/': primitivediv,
-        '<': primitivelt,
-        '>': primitivegt,
-        '=': primitiveeqn,
-        'eq?': primitiveeqn,
+        '<': lambda x, y: x < y,
+        '>': lambda x, y: x > y,
+        '=': lambda x, y: x == y,
+        'eq?': lambda x, y: x == y,
         'zero?': primitivezerop,
         'null?': primitivenullp,
-        'atom?': primitiveatomp,
-        'not': primitivenot,
+        'atom?': lambda x: isinstance(x, str),
+        'not': lambda x: not x,
         'cons': primitivecons,
-        'car': primitivecar,
-        'cdr': primitivecdr,
+        'car': lambda l: l[0],
+        'cdr': lambda l: l[1:],
         'else': True
         })
-    return globalenv
+    return env
 
 globalenv = addtoglobal(makeenv())
 
-def apply(sexp, env=globalenv):
-    op = eval(sexp[0], env)
-    args = []
-    for exp in sexp[1:]:
-        args.append(eval(exp, env))
-    return op(*args)
 
 def eval(sexp, env=globalenv):
     if islist(sexp):
@@ -242,8 +215,12 @@ def eval(sexp, env=globalenv):
                 if eval(exp, env):
                     return True
             return False
-        else:
-            return apply(sexp, env)
+        else: # apply
+            op = eval(sexp[0], env)
+            args = []
+            for exp in sexp[1:]:
+                args.append(eval(exp, env))
+            return op(*args)
     elif sexp == '#t':
         return True
     elif sexp == '#f':
