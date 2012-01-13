@@ -197,58 +197,7 @@ def addtoglobal(globalenv):
         })
     return globalenv
 
-evalto = makeenv()
-globalenv = addtoglobal(makeenv(evalto))
-
-def evalbegin(sexp, env=globalenv):
-    for exp in sexp[1:-1]:
-        eval(exp, env)
-    return eval(sexp[-1], env)
-
-def evalquote(sexp, env=globalenv):
-    return sexp[1]
-
-def evallambda(sexp, env=globalenv):
-    exps = sexp[2:]
-    exps.insert(0, 'begin')
-    return Lambda(env, sexp[1], exps)
-
-def evalcond(sexp, env=globalenv):
-    for cond_exp in sexp[1:]:
-        cond = cond_exp[0]
-        exp = cond_exp[1:]
-        if eval(cond, env):
-            exp.insert(0, 'begin')
-            return eval(exp, env)
-
-def evaldefine(sexp, env=globalenv):
-    defn = eval(sexp[2], env)
-    env.update({
-        sexp[1]: defn
-        })
-    return defn
-
-def evaland(sexp, env=globalenv):
-    for exp in sexp[1:]:
-        if not eval(exp, env):
-            return False
-    return True
-
-def evalor(sexp, env=globalenv):
-    for exp in sexp[1:]:
-        if eval(exp, env):
-            return True
-    return False
-
-evalto.update({
-        'begin': evalbegin,
-        'quote': evalquote,
-        'lambda': evallambda,
-        'cond': evalcond,
-        'define': evaldefine,
-        'and': evaland,
-        'or': evalor
-        })
+globalenv = addtoglobal(makeenv())
 
 def apply(sexp, env=globalenv):
     op = eval(sexp[0], env)
@@ -259,10 +208,41 @@ def apply(sexp, env=globalenv):
 
 def eval(sexp, env=globalenv):
     if islist(sexp):
-        try:
-            func = evalto[sexp[0]]
-            return func(sexp, env)
-        except (KeyError, TypeError):
+        op = sexp[0]
+        if op == 'begin':
+            for exp in sexp[1:-1]:
+                eval(exp, env)
+            return eval(sexp[-1], env)
+        elif op == 'quote':
+            return sexp[1]
+        elif op == 'lambda':
+            exps = sexp[2:]
+            exps.insert(0, 'begin')
+            return Lambda(env, sexp[1], exps)
+        elif op == 'cond':
+            for cond_exp in sexp[1:]:
+                cond = cond_exp[0]
+                exp = cond_exp[1:]
+                if eval(cond, env):
+                    exp.insert(0, 'begin')
+                    return eval(exp, env)
+        elif op == 'define':
+            defn = eval(sexp[2], env)
+            env.update({
+                sexp[1]: defn
+                })
+            return defn
+        elif op == 'and':
+            for exp in sexp[1:]:
+                if not eval(exp, env):
+                    return False
+            return True
+        elif op == 'or':
+            for exp in sexp[1:]:
+                if eval(exp, env):
+                    return True
+            return False
+        else:
             return apply(sexp, env)
     elif sexp == '#t':
         return True
@@ -287,9 +267,6 @@ class Lambda:
         localenv.update(dict(zip(self.arglist, arg)))
         return eval(self.sexp, localenv)
 
-def error(s):
-    print('ERROR:', s)
-
 def find(sym, env):
     """
     Find a symbol in env
@@ -301,7 +278,7 @@ def find(sym, env):
             return env[sym]
         else:
             return find(sym, env['outer'])
-    except TypeError as e:
+    except TypeError:
         # once hit here, sym is nowhere to be found
         raise NameError("Undefined atom {0!r}".format(sym))
 
