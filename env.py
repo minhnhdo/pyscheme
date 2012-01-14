@@ -25,7 +25,8 @@ class Env(dict):
                 # once hit here, sym is nowhere to be found
                 raise NameError("Undefined atom {0!r}".format(sym))
 
-def addtoglobal(env):
+def makeglobalenv():
+    env = Env()
     def primitivequit():
         raise KeyboardInterrupt
 
@@ -57,5 +58,3 @@ def addtoglobal(env):
         'else': True
         })
     return env
-
-globalenv = addtoglobal(Env())

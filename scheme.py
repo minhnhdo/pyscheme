@@ -3,13 +3,15 @@
 from __future__ import division
 
 from parse import parse, Tokenizer
-from env import globalenv, Env
+from env import makeglobalenv, Env
 from primitives import islist, isbool, isatom, isnumber
 
 try:
     input = raw_input
 except NameError:
     pass
+
+globalenv = makeglobalenv()
 
 def eval(sexp, env=globalenv):
     if islist(sexp):
