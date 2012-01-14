@@ -1,3 +1,8 @@
+class TokenStreamError(Exception):
+    """
+    Token stream error
+    """
+
 class Tokenizer:
     """
     Turn a string into a list of tokens
@@ -74,14 +79,16 @@ def parse_sexp(tokens):
         tok = next(tokens)
         if tok == '(':
             return parse_list(tokens)
-        if tok == "'":
+        elif tok == "'":
             retval = ['quote']
             retval.append(parse_sexp(tokens))
             return retval
+        elif tok == ')':
+            raise TokenStreamError('Unexpected )')
         else:
             return parse_atom(tok)
     except (StopIteration, IndexError):
-        raise SyntaxError("Unexpected end of token stream")
+        raise SyntaxError('Unexpected end of token stream')
 
 def parse(s):
     """
