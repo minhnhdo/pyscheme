@@ -11,9 +11,7 @@ try:
 except NameError:
     pass
 
-globalenv = makeglobalenv()
-
-def eval(sexp, env=globalenv):
+def eval(sexp, env):
     if islist(sexp):
         op = sexp[0]
         if op == 'begin':
@@ -85,6 +83,8 @@ def tostring(a):
         return str(a)
 
 def REPL():
+    globalenv = makeglobalenv()
+
     while True:
         try:
             inp = input('* ')
@@ -92,9 +92,12 @@ def REPL():
                 try:
                     sexp = parse(inp)
                     break
-                except SyntaxError:
-                    inp += ' ' + input('  ')
-            print(tostring(eval(sexp)))
+                except SyntaxError as e:
+                    if e.msg == 'Unexpected end of token stream':
+                        inp += ' ' + input('  ')
+                    else:
+                        raise e
+            print(tostring(eval(sexp, globalenv)))
         except (KeyboardInterrupt, EOFError):
             print("Exiting... Bye!")
             return

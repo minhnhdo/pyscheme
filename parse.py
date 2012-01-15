@@ -1,8 +1,3 @@
-class TokenStreamError(Exception):
-    """
-    Token stream error
-    """
-
 class Tokenizer:
     """
     Turn a string into a list of tokens
@@ -84,7 +79,7 @@ def parse_sexp(tokens):
             retval.append(parse_sexp(tokens))
             return retval
         elif tok == ')':
-            raise TokenStreamError('Unexpected )')
+            raise SyntaxError('Unexpected )')
         else:
             return parse_atom(tok)
     except (StopIteration, IndexError):
