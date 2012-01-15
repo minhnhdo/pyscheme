@@ -1,7 +1,10 @@
 from __future__ import division
 
 import math, operator
-from functools import reduce
+
+try: from functools import reduce
+except ImportError:
+    pass
 
 from primitives import islist, isbool, isatom, isnumber
 
