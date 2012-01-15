@@ -2,7 +2,7 @@
 
 from __future__ import division
 
-from parse import parse, Tokenizer
+from parse import parse, parse_continuous, Tokenizer
 from env import makeglobalenv, Env
 from primitives import islist, isbool, isatom, isnumber
 
@@ -92,7 +92,7 @@ def REPL():
                 try:
                     sexp = parse(inp)
                     break
-                except SyntaxError as e:
+                except (SyntaxError,), e:
                     if e.msg == 'Unexpected end of token stream':
                         inp += ' ' + input('  ')
                     else:
@@ -101,7 +101,7 @@ def REPL():
         except (KeyboardInterrupt, EOFError):
             print("Exiting... Bye!")
             return
-        except Exception as e:
+        except (Exception,), e:
             print(str(e))
 
 if __name__ == '__main__':

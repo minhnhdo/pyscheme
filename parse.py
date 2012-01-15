@@ -90,3 +90,11 @@ def parse(s):
     Tokenize then parse
     """
     return parse_sexp(Tokenizer(s))
+
+def parse_continuous(s):
+    """
+    Continuously tokenize then parse
+    """
+    tokens = Tokenizer(s)
+    for t in tokens:
+        yield parse_sexp(tokens.rollback())
