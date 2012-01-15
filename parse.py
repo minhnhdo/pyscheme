@@ -71,7 +71,7 @@ def parse_sexp(tokens):
             a list if first of stream represents a list
     """
     try:
-        tok = next(tokens)
+        tok = tokens.next()
         if tok == '(':
             return parse_list(tokens)
         elif tok == "'":

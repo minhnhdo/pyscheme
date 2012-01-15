@@ -66,10 +66,10 @@ class Lambda:
         self.sexp = sexp
         self.outerenv = env
     def __repr__(self):
-        return '<compound function at 0x{0:x}>'.format(id(self))
+        return '<compound function at 0x%x>' % id(self)
     def __call__(self, *arg):
         if len(arg) != len(self.arglist):
-            raise TypeError("Expected {0} arguments ({1} provided)".format(len(self.arglist), len(arg)))
+            raise TypeError("Expected %d arguments (%d provided)" % (len(self.arglist), len(arg)))
         localenv = Env(self.outerenv)
         localenv.update(dict(zip(self.arglist, arg)))
         return eval(self.sexp, localenv)
@@ -92,7 +92,7 @@ def REPL():
                 try:
                     sexp = parse(inp)
                     break
-                except (SyntaxError,), e:
+                except SyntaxError as e:
                     if e.msg == 'Unexpected end of token stream':
                         inp += ' ' + input('  ')
                     else:
@@ -101,8 +101,8 @@ def REPL():
         except (KeyboardInterrupt, EOFError):
             print("Exiting... Bye!")
             return
-        except (Exception,), e:
-            print(str(e))
+        #except Exception as e:
+        #    print(str(e))
 
 if __name__ == '__main__':
     REPL()

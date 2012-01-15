@@ -23,7 +23,7 @@ class Env(dict):
             try: return self['outer'].find(sym)
             except AttributeError:
                 # once hit here, sym is nowhere to be found
-                raise NameError("Undefined atom {0!r}".format(sym))
+                raise NameError('Undefined atom %s' % sym)
 
 def makeglobalenv():
     env = Env()
